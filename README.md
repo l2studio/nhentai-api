@@ -1,3 +1,3 @@
 # L2 Studio - NHentai API
 
-A library for [nhentai.net]() http web api
+A library for [nhentai.net](https://nhentai.net) http web api
