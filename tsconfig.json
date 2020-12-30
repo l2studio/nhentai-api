@@ -2,15 +2,15 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "commonjs",
-    "outDir": "lib"
+    "outDir": "lib",
+    "declaration": true,
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "removeComments": true
   },
-  "declaration": true,
-  "sourceMap": true,
-  "strict": true,
-  "noImplicitAny": true,
-  "esModuleInterop": true,
-  "moduleResolution": "node",
-  "removeComments": true,
   "exclude": [
     "node_modules"
   ],

@@ -5,7 +5,7 @@ import { stringify as qs } from 'querystring'
 import axios from 'axios'
 
 const debug = require('debug')('lgou2w:nhentai-api')
-const isDebug = typeof process.env.DEBUG === 'string'
+const isDebug = typeof process.env.DEBUG !== 'undefined'
 
 export const URL = {
   BASE: 'https://nhentai.net',
@@ -35,7 +35,7 @@ export class NHentaiAPI {
     if (isDebug) {
       this.req.interceptors.request.use((config) => {
         const param = config.params ? '?' + qs(config.params) : ''
-        debug('AXIOS -> %s %s', config.method.toUpperCase(), config.url + param)
+        debug('AXIOS -> %s %s', config.method!.toUpperCase(), config.url + param)
         return config
       })
     }
