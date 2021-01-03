@@ -120,12 +120,12 @@ export class NHentaiAPI {
     name: number | 'cover' | 'thumb',
     image: Image | ImageType,
     isPreview?: boolean
-  ): Promise<Readable> {
+  ): Promise<{ data: Readable, headers: any }> {
     const url = this.stringifyImageUrl(gallery, name, image, isPreview)
     const host = (url.indexOf(URL.THUMB) !== -1 ? URL.THUMB : URL.IMAGE).substring(8) // https://
     return this.req
       .get<Readable>(url, { headers: { host }, responseType: 'stream' })
-      .then((res) => res.data)
+      .then((res) => ({ data: res.data, headers: res.headers }))
       .catch(this.errorHandler)
   }
 
@@ -134,16 +134,16 @@ export class NHentaiAPI {
     name: number | 'cover' | 'thumb',
     image: Image | ImageType,
     isPreview?: boolean
-  ): Promise<Buffer> {
+  ): Promise<{ data: Buffer, headers: any }> {
     const fetchImage = this.fetchImage.bind(this)
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise<Buffer>(async (resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
-        const stream = await fetchImage(gallery, name, image, isPreview)
+        const { data, headers } = await fetchImage(gallery, name, image, isPreview)
         const buf: Buffer[] = []
-        stream.once('error', reject)
-        stream.on('data', (chunk: Buffer) => { buf.push(chunk) })
-        stream.on('end', () => { resolve(Buffer.concat(buf)) })
+        data.once('error', reject)
+        data.on('data', (chunk: Buffer) => { buf.push(chunk) })
+        data.on('end', () => { resolve({ data: Buffer.concat(buf), headers }) })
       } catch (e) {
         reject(e)
       }
