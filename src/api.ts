@@ -102,38 +102,26 @@ export class NHentaiAPI {
   stringifyImageUrl (
     gallery: Gallery | number,
     name: number | 'cover' | 'thumb',
-    image: Image | ImageType
+    image: Image | ImageType,
+    isPreview?: boolean
   ): string {
+    isPreview = isPreview || false
     const mediaId = typeof gallery === 'object' ? parseInt(gallery.media_id) : gallery
     if (typeof name === 'number' && name < 1) throw new Error('无效的图片名字索引，应大于 0 值')
     if (isNaN(mediaId) || mediaId <= 0) throw new Error('无效的画廊媒体 ID 值：' + mediaId)
-    const url = typeof name === 'number' ? URL.IMAGE : URL.THUMB
+    const url = typeof name === 'number' && !isPreview ? URL.IMAGE : URL.THUMB
+    const file = typeof name === 'string' && isPreview ? '1t' : isPreview ? name + 't' : name
     const extension = NHentaiAPI.DEFAULT_IMAGE_TYPE_TRANSFORM(typeof image === 'object' ? image.t : image)
-    return `${url}/galleries/${mediaId}/${name}.${extension}`
-  }
-
-  stringifyImageUrls (
-    gallery: Gallery,
-    skipCoverAndThumbnail?: boolean
-  ): string[] {
-    skipCoverAndThumbnail = skipCoverAndThumbnail || false
-    const urls: string[] = []
-    if (!skipCoverAndThumbnail) {
-      urls.push(this.stringifyImageUrl(gallery, 'cover', gallery.images.cover))
-      urls.push(this.stringifyImageUrl(gallery, 'thumb', gallery.images.thumbnail))
-    }
-    const pages = gallery.images.pages
-    let i = 0
-    for (const page of pages) urls.push(this.stringifyImageUrl(gallery, ++i, page))
-    return urls
+    return `${url}/galleries/${mediaId}/${file}.${extension}`
   }
 
   fetchImage (
     gallery: Gallery | number,
     name: number | 'cover' | 'thumb',
-    image: Image | ImageType
+    image: Image | ImageType,
+    isPreview?: boolean
   ): Promise<Readable> {
-    const url = this.stringifyImageUrl(gallery, name, image)
+    const url = this.stringifyImageUrl(gallery, name, image, isPreview)
     const host = (url.indexOf(URL.THUMB) !== -1 ? URL.THUMB : URL.IMAGE).substring(8) // https://
     return this.req
       .get<Readable>(url, { headers: { host }, responseType: 'stream' })
@@ -144,13 +132,14 @@ export class NHentaiAPI {
   fetchImageAsBuffer (
     gallery: Gallery | number,
     name: number | 'cover' | 'thumb',
-    image: Image | ImageType
+    image: Image | ImageType,
+    isPreview?: boolean
   ): Promise<Buffer> {
-    const _this = this
+    const fetchImage = this.fetchImage.bind(this)
     // eslint-disable-next-line no-async-promise-executor
     return new Promise<Buffer>(async (resolve, reject) => {
       try {
-        const stream = await _this.fetchImage(gallery, name, image)
+        const stream = await fetchImage(gallery, name, image, isPreview)
         const buf: Buffer[] = []
         stream.once('error', reject)
         stream.on('data', (chunk: Buffer) => { buf.push(chunk) })
