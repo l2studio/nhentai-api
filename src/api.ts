@@ -15,6 +15,22 @@ export const URL = {
   THUMB: 'https://t.nhentai.net'
 }
 
+type ImageSuffix = ImageType | 'jpg' | 'png' | 'gif'
+export const IMAGE_TYPE_TRANSFORM = (type: ImageSuffix) => {
+  switch (type) {
+    case 'jpg':
+    case 'j':
+      return 'jpg'
+    case 'png':
+    case 'p':
+      return 'png'
+    case 'gif':
+    case 'g':
+      return 'gif'
+    default: throw new Error('不支持的图片类型转换：' + type)
+  }
+}
+
 export type Options = Partial<{
   timeout: number
   proxy: {
@@ -39,15 +55,6 @@ export class NHentaiAPI {
         debug('AXIOS -> %s %s', config.method!.toUpperCase(), config.url + param)
         return config
       })
-    }
-  }
-
-  static readonly DEFAULT_IMAGE_TYPE_TRANSFORM = (type: ImageType) => {
-    switch (type) {
-      case 'j': return 'jpg'
-      case 'p': return 'png'
-      case 'g': return 'gif'
-      default: throw new Error('不支持的图片类型转换：' + type)
     }
   }
 
@@ -100,28 +107,28 @@ export class NHentaiAPI {
   }
 
   stringifyImageUrl (
-    gallery: Gallery | number,
-    name: number | 'cover' | 'thumb',
-    image: Image | ImageType,
+    galleryMediaId: Gallery | number,
+    imageName: number | 'cover' | 'thumb',
+    imageSuffix: Image | ImageSuffix,
     isPreview?: boolean
   ): string {
     isPreview = isPreview || false
-    const mediaId = typeof gallery === 'object' ? parseInt(gallery.media_id) : gallery
-    if (typeof name === 'number' && name < 1) throw new Error('无效的图片名字索引，应大于 0 值')
+    const mediaId = typeof galleryMediaId === 'object' ? parseInt(galleryMediaId.media_id) : galleryMediaId
+    if (typeof imageName === 'number' && imageName < 1) throw new Error('无效的图片名字索引，应大于 0 值')
     if (isNaN(mediaId) || mediaId <= 0) throw new Error('无效的画廊媒体 ID 值：' + mediaId)
-    const url = typeof name === 'number' && !isPreview ? URL.IMAGE : URL.THUMB
-    const file = typeof name === 'string' && isPreview ? '1t' : isPreview ? name + 't' : name
-    const extension = NHentaiAPI.DEFAULT_IMAGE_TYPE_TRANSFORM(typeof image === 'object' ? image.t : image)
+    const url = typeof imageName === 'number' && !isPreview ? URL.IMAGE : URL.THUMB
+    const file = typeof imageName === 'string' && isPreview ? '1t' : isPreview ? imageName + 't' : imageName
+    const extension = IMAGE_TYPE_TRANSFORM(typeof imageSuffix === 'object' ? imageSuffix.t : imageSuffix)
     return `${url}/galleries/${mediaId}/${file}.${extension}`
   }
 
   fetchImage (
-    gallery: Gallery | number,
-    name: number | 'cover' | 'thumb',
-    image: Image | ImageType,
+    galleryMediaId: Gallery | number,
+    imageName: number | 'cover' | 'thumb',
+    imageSuffix: Image | ImageSuffix,
     isPreview?: boolean
   ): Promise<{ data: Readable, headers: any }> {
-    const url = this.stringifyImageUrl(gallery, name, image, isPreview)
+    const url = this.stringifyImageUrl(galleryMediaId, imageName, imageSuffix, isPreview)
     const host = (url.indexOf(URL.THUMB) !== -1 ? URL.THUMB : URL.IMAGE).substring(8) // https://
     return this.req
       .get<Readable>(url, { headers: { host }, responseType: 'stream' })
@@ -130,16 +137,16 @@ export class NHentaiAPI {
   }
 
   fetchImageAsBuffer (
-    gallery: Gallery | number,
-    name: number | 'cover' | 'thumb',
-    image: Image | ImageType,
+    galleryMediaId: Gallery | number,
+    imageName: number | 'cover' | 'thumb',
+    imageSuffix: Image | ImageSuffix,
     isPreview?: boolean
   ): Promise<{ data: Buffer, headers: any }> {
     const fetchImage = this.fetchImage.bind(this)
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       try {
-        const { data, headers } = await fetchImage(gallery, name, image, isPreview)
+        const { data, headers } = await fetchImage(galleryMediaId, imageName, imageSuffix, isPreview)
         const buf: Buffer[] = []
         data.once('error', reject)
         data.on('data', (chunk: Buffer) => { buf.push(chunk) })
