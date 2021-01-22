@@ -1,6 +1,8 @@
 /* eslint-disable camelcase */
 
 export type ImageType = 'j' | 'p' | 'g'
+export type ImageSuffix = 'jpg' | 'png' | 'gif'
+export type ImageName = number | 'cover' | 'thumb'
 
 export interface Image {
   t: ImageType

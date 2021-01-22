@@ -1,4 +1,4 @@
-import type { Gallery, Galleries, Image, ImageType } from './type'
+import type { Gallery, Galleries, Image, ImageName, ImageType, ImageSuffix } from './type'
 import type { AxiosInstance, AxiosError } from 'axios'
 import type { Readable } from 'stream'
 import { httpsOverHttp, httpOverHttp } from 'tunnel'
@@ -15,9 +15,8 @@ export const URL = {
   THUMB: 'https://t.nhentai.net'
 }
 
-type ImageSuffix = ImageType | 'jpg' | 'png' | 'gif'
-export const IMAGE_TYPE_TRANSFORM = (type: ImageSuffix) => {
-  switch (type) {
+export const IMAGE_TYPE_TRANSFORM = (input: ImageType | ImageSuffix): ImageSuffix => {
+  switch (input) {
     case 'jpg':
     case 'j':
       return 'jpg'
@@ -27,7 +26,7 @@ export const IMAGE_TYPE_TRANSFORM = (type: ImageSuffix) => {
     case 'gif':
     case 'g':
       return 'gif'
-    default: throw new Error('不支持的图片类型转换：' + type)
+    default: throw new Error('不支持的图片类型转换：' + input)
   }
 }
 
@@ -108,8 +107,8 @@ export class NHentaiAPI {
 
   stringifyImageUrl (
     galleryMediaId: Gallery | number,
-    imageName: number | 'cover' | 'thumb',
-    imageSuffix: Image | ImageSuffix,
+    imageName: ImageName,
+    imageSuffix: Image | ImageType | ImageSuffix,
     isPreview?: boolean
   ): string {
     isPreview = isPreview || false
@@ -124,8 +123,8 @@ export class NHentaiAPI {
 
   fetchImage (
     galleryMediaId: Gallery | number,
-    imageName: number | 'cover' | 'thumb',
-    imageSuffix: Image | ImageSuffix,
+    imageName: ImageName,
+    imageSuffix: Image | ImageType | ImageSuffix,
     isPreview?: boolean
   ): Promise<{ data: Readable, headers: any }> {
     const url = this.stringifyImageUrl(galleryMediaId, imageName, imageSuffix, isPreview)
@@ -138,8 +137,8 @@ export class NHentaiAPI {
 
   fetchImageAsBuffer (
     galleryMediaId: Gallery | number,
-    imageName: number | 'cover' | 'thumb',
-    imageSuffix: Image | ImageSuffix,
+    imageName: ImageName,
+    imageSuffix: Image | ImageType | ImageSuffix,
     isPreview?: boolean
   ): Promise<{ data: Buffer, headers: any }> {
     const fetchImage = this.fetchImage.bind(this)
