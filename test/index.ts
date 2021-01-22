@@ -2,7 +2,7 @@
 
 import { NHentaiAPI } from '../src'
 
-const debug = require('debug')('l2s:nhentai-api-test')
+const debug = require('debug')('lgou2w:nhentai-api-test')
 const useProxy = false
 
 const nhentai = new NHentaiAPI({

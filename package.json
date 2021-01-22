@@ -13,7 +13,7 @@
   "scripts": {
     "clean": "rimraf lib",
     "build": "npm run clean && tsc",
-    "test": "cross-env DEBUG='l2s:*' ts-node -T -P tsconfig.json test/index.ts",
+    "test": "cross-env DEBUG='lgou2w:*' ts-node -T -P tsconfig.json test/index.ts",
     "lint": "eslint --ext .js,.ts,.tsx --ignore-path .gitignore .",
     "prepublishOnly": "npm run lint && npm run build"
   },

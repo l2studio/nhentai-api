@@ -5,7 +5,7 @@ import { httpsOverHttp, httpOverHttp } from 'tunnel'
 import { stringify as qs } from 'querystring'
 import axios from 'axios'
 
-const debug = require('debug')('l2s:nhentai-api')
+const debug = require('debug')('lgou2w:nhentai-api')
 const isDebug = typeof process.env.DEBUG !== 'undefined'
 
 export const URL = {
