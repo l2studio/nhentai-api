@@ -1,2 +1,2 @@
-export { NHentaiAPI, Options, IMAGE_TYPE_TRANSFORM } from './api'
-export { Gallery, Galleries, Image, TagType, Tag, ImageType } from './type'
+export { NHentaiAPI, Options, IMAGE_TYPE_TRANSFORM, URL } from './api'
+export { Gallery, Galleries, Image, TagType, Tag, ImageName, ImageType, ImageSuffix } from './type'
