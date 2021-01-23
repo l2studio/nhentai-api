@@ -41,10 +41,11 @@ export type Options = Partial<{
 export class NHentaiAPI {
   private readonly req: AxiosInstance
 
-  constructor (opts: Options) {
+  constructor (opts?: Options) {
+    opts = opts || {}
     this.req = axios.create({
       maxRedirects: 0,
-      timeout: opts.timeout || 5000,
+      timeout: opts.timeout,
       httpsAgent: opts.proxy ? httpsOverHttp({ proxy: opts.proxy }) : undefined,
       httpAgent: opts.proxy ? httpOverHttp({ proxy: opts.proxy }) : undefined
     })
