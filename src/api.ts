@@ -7,6 +7,7 @@ import axios from 'axios'
 
 const debug = require('debug')('lgou2w:nhentai-api')
 const isDebug = typeof process.env.DEBUG !== 'undefined'
+const DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36'
 
 export const URL = {
   BASE: 'https://nhentai.net',
@@ -32,6 +33,7 @@ export const IMAGE_TYPE_TRANSFORM = (input: ImageType | ImageSuffix): ImageSuffi
 
 export type Options = Partial<{
   timeout: number
+  userAgent: string
   proxy: {
     host: string
     port: number
@@ -47,7 +49,10 @@ export class NHentaiAPI {
       maxRedirects: 0,
       timeout: opts.timeout,
       httpsAgent: opts.proxy ? httpsOverHttp({ proxy: opts.proxy }) : undefined,
-      httpAgent: opts.proxy ? httpOverHttp({ proxy: opts.proxy }) : undefined
+      httpAgent: opts.proxy ? httpOverHttp({ proxy: opts.proxy }) : undefined,
+      headers: {
+        'user-agent': opts.userAgent || DEFAULT_UA
+      }
     })
     if (isDebug) {
       this.req.interceptors.request.use((config) => {
