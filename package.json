@@ -39,8 +39,8 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "axios": "^0.21.1",
     "debug": "^4.3.1",
+    "got": "^11.8.2",
     "tunnel": "^0.0.6"
   }
 }

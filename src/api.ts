@@ -1,9 +1,7 @@
 import type { Gallery, Galleries, Image, ImageName, ImageType, ImageSuffix } from './type'
-import type { AxiosInstance, AxiosError } from 'axios'
-import type { Readable } from 'stream'
+import type { Duplex } from 'stream'
 import { httpsOverHttp, httpOverHttp } from 'tunnel'
-import { stringify as qs } from 'querystring'
-import axios from 'axios'
+import got from 'got'
 
 const debug = require('debug')('lgou2w:nhentai-api')
 const isDebug = typeof process.env.DEBUG !== 'undefined'
@@ -41,73 +39,75 @@ export type Options = Partial<{
 }>
 
 export class NHentaiAPI {
-  private readonly req: AxiosInstance
+  private readonly _fetch: typeof got
 
   constructor (opts?: Options) {
     opts = opts || {}
-    this.req = axios.create({
+    this._fetch = got.extend({
       maxRedirects: 0,
+      followRedirect: false,
       timeout: opts.timeout,
-      httpsAgent: opts.proxy ? httpsOverHttp({ proxy: opts.proxy }) : undefined,
-      httpAgent: opts.proxy ? httpOverHttp({ proxy: opts.proxy }) : undefined,
-      headers: {
-        'user-agent': opts.userAgent || DEFAULT_UA
-      }
+      agent: opts.proxy
+        ? {
+            http: httpOverHttp({ proxy: opts.proxy }),
+            https: httpsOverHttp({ proxy: opts.proxy }) as any
+          }
+        : undefined,
+      headers: { 'user-agent': opts.userAgent || DEFAULT_UA },
+      hooks: isDebug
+        ? {
+            beforeRequest: [
+              options => {
+                const param = options.searchParams ? '?' + options.searchParams.toString() : ''
+                debug('FETCH -> %s %s', options.method.toUpperCase(), options.url.toString() + param)
+              }
+            ]
+          }
+        : undefined
     })
-    if (isDebug) {
-      this.req.interceptors.request.use((config) => {
-        const param = config.params ? '?' + qs(config.params) : ''
-        debug('AXIOS -> %s %s', config.method!.toUpperCase(), config.url + param)
-        return config
-      })
-    }
   }
 
-  private readonly errorHandler = (err: AxiosError | Error | any): Promise<never> => {
+  private readonly errorHandler = (err: Error | any): Promise<never> => {
     debug(err)
     return Promise.reject(err)
   }
 
   fetch (id: number): Promise<Gallery> {
     debug('请求获取 %d 的画廊数据...', id)
-    return this.req
-      .get(`${URL.API}/gallery/${id}`)
-      .then((res) => res.data)
+    return this._fetch(`${URL.API}/gallery/${id}`)
+      .json<Gallery>()
       .catch(this.errorHandler)
   }
 
   fetchRelated (id: number): Promise<Gallery[]> {
     debug('请求获取 %d 的相关画廊数据...', id)
-    return this.req
-      .get(`${URL.API}/gallery/${id}/related`)
-      .then((res) => res.data.result)
+    return this._fetch(`${URL.API}/gallery/${id}/related`)
+      .json<{ result: Gallery[] }>()
+      .then((data) => data.result)
       .catch(this.errorHandler)
   }
 
   fetchAll (page?: number): Promise<Galleries> {
     page = page || 1
     debug('请求获取第 %d 页的画廊数据...', page)
-    return this.req
-      .get(`${URL.API}/galleries/all`, { params: { page } })
-      .then((res) => res.data)
+    return this._fetch(`${URL.API}/galleries/all`, { searchParams: { page } })
+      .json<Galleries>()
       .catch(this.errorHandler)
   }
 
   search (query: string, page?: number): Promise<Galleries> {
     page = page || 1
     debug('请求搜索关键字 %s 的第 %d 页的画廊数据...', query, page)
-    return this.req
-      .get(`${URL.API}/galleries/search`, { params: { query, page } })
-      .then((res) => res.data)
+    return this._fetch(`${URL.API}/galleries/search`, { searchParams: { query, page } })
+      .json<Galleries>()
       .catch(this.errorHandler)
   }
 
   searchByTag (tagId: number, page?: number): Promise<Galleries> {
     page = page || 1
     debug('请求搜索标签 %d 的第 %d 页的画廊数据...', tagId, page)
-    return this.req
-      .get(`${URL.API}/galleries/tagged`, { params: { tag_id: tagId, page } })
-      .then((res) => res.data)
+    return this._fetch(`${URL.API}/galleries/tagged`, { searchParams: { tag_id: tagId, page } })
+      .json<Galleries>()
       .catch(this.errorHandler)
   }
 
@@ -127,18 +127,25 @@ export class NHentaiAPI {
     return `${url}/galleries/${mediaId}/${file}.${extension}`
   }
 
-  fetchImage (
+  async fetchImage (
     galleryMediaId: Gallery | number,
     imageName: ImageName,
     imageSuffix: Image | ImageType | ImageSuffix,
     isPreview?: boolean
-  ): Promise<{ data: Readable, headers: any }> {
+  ): Promise<{ data: Duplex, headers: any }> {
     const url = this.stringifyImageUrl(galleryMediaId, imageName, imageSuffix, isPreview)
     const host = (url.indexOf(URL.THUMB) !== -1 ? URL.THUMB : URL.IMAGE).substring(8) // https://
-    return this.req
-      .get<Readable>(url, { headers: { host }, responseType: 'stream' })
-      .then((res) => ({ data: res.data, headers: res.headers }))
-      .catch(this.errorHandler)
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve, reject) => {
+      try {
+        const stream = await this._fetch.stream(url, { headers: { host } })
+        stream.once('response', (res) => {
+          resolve({ data: stream, headers: res.headers })
+        })
+      } catch (e) {
+        reject(e)
+      }
+    })
   }
 
   fetchImageAsBuffer (
