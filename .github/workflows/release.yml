@@ -1,4 +1,4 @@
-name: Node.js Release
+name: Release
 
 on:
   push:
@@ -113,7 +113,6 @@ jobs:
           echo "::set-output name=value::Change set since ${last_tag:-the beginning}:  %0A%0A$changelog"
 
       - name: GitHub Release
-        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB_PUBLISH }}
