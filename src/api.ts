@@ -58,8 +58,7 @@ export class NHentaiAPI {
         ? {
             beforeRequest: [
               options => {
-                const param = options.searchParams ? '?' + options.searchParams.toString() : ''
-                debug('FETCH -> %s %s', options.method.toUpperCase(), options.url.toString() + param)
+                debug('FETCH -> %s %s', options.method.toUpperCase(), options.url.toString())
               }
             ]
           }
