@@ -41,6 +41,12 @@ jobs:
           node-version: 12
           registry-url: https://registry.npmjs.org/
 
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 6.4.0
+          run_install: true
+
       - name: Publish to NPM
         run: npm publish --access public
         env:
@@ -56,6 +62,12 @@ jobs:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
           scope: '@l2studio'
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 6.4.0
+          run_install: true
 
       - run: echo registry=https://npm.pkg.github.com/l2studio >> .npmrc
       - name: Publish to GitHub
