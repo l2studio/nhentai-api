@@ -75,6 +75,7 @@ export class NHentaiAPI {
     debug('请求获取 %d 的画廊数据...', id)
     return this._fetch(`${URL.API}/gallery/${id}`)
       .json<Gallery>()
+      .then((g) => fixGallery(g) as Gallery)
       .catch(this.errorHandler)
   }
 
@@ -82,7 +83,7 @@ export class NHentaiAPI {
     debug('请求获取 %d 的相关画廊数据...', id)
     return this._fetch(`${URL.API}/gallery/${id}/related`)
       .json<{ result: Gallery[] }>()
-      .then((data) => data.result)
+      .then((data) => fixGallery(data.result) as Gallery[])
       .catch(this.errorHandler)
   }
 
@@ -91,6 +92,7 @@ export class NHentaiAPI {
     debug('请求获取第 %d 页的画廊数据...', page)
     return this._fetch(`${URL.API}/galleries/all`, { searchParams: { page } })
       .json<Galleries>()
+      .then(fixGalleries)
       .catch(this.errorHandler)
   }
 
@@ -99,6 +101,7 @@ export class NHentaiAPI {
     debug('请求搜索关键字 %s 的第 %d 页的画廊数据...', query, page)
     return this._fetch(`${URL.API}/galleries/search`, { searchParams: { query, page } })
       .json<Galleries>()
+      .then(fixGalleries)
       .catch(this.errorHandler)
   }
 
@@ -107,6 +110,7 @@ export class NHentaiAPI {
     debug('请求搜索标签 %d 的第 %d 页的画廊数据...', tagId, page)
     return this._fetch(`${URL.API}/galleries/tagged`, { searchParams: { tag_id: tagId, page } })
       .json<Galleries>()
+      .then(fixGalleries)
       .catch(this.errorHandler)
   }
 
@@ -167,4 +171,22 @@ export class NHentaiAPI {
       }
     })
   }
+}
+
+function fixGallery (gallery: Gallery | Gallery[]): Gallery | Gallery[] {
+  if (Array.isArray(gallery)) {
+    for (const item of gallery) {
+      if (typeof item.id === 'string') {
+        item.id = parseInt(item.id)
+      }
+    }
+  } else if (typeof gallery.id === 'string') {
+    gallery.id = parseInt(gallery.id)
+  }
+  return gallery
+}
+
+function fixGalleries (galleries: Galleries): Galleries {
+  fixGallery(galleries.result)
+  return galleries
 }
