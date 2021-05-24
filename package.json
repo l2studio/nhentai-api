@@ -20,6 +20,17 @@
   "files": [
     "lib"
   ],
+  "keywords": [
+    "l2studio",
+    "lgou2w",
+    "nhentai-api",
+    "nhentai-client",
+    "nhentai",
+    "hentai",
+    "hentai-book",
+    "r18",
+    "r18-book"
+  ],
   "devDependencies": {
     "@types/node": "^14.17.0",
     "@types/tunnel": "^0.0.1",
