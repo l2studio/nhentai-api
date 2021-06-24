@@ -142,6 +142,7 @@ export class NHentaiAPI {
     return new Promise(async (resolve, reject) => {
       try {
         const stream = await this._fetch.stream(url, { headers: { host } })
+        stream.once('error', reject)
         stream.once('response', (res) => {
           resolve({ data: stream, headers: res.headers })
         })
