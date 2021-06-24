@@ -22,7 +22,7 @@ export interface Tag {
 
 export interface Gallery {
   id: number
-  media_id: string
+  media_id: number
   title: {
     english: string
     japanese?: string

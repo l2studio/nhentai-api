@@ -121,7 +121,7 @@ export class NHentaiAPI {
     isPreview?: boolean
   ): string {
     isPreview = isPreview || false
-    const mediaId = typeof galleryMediaId === 'object' ? parseInt(galleryMediaId.media_id) : galleryMediaId
+    const mediaId = typeof galleryMediaId === 'object' ? galleryMediaId.media_id : galleryMediaId
     if (typeof imageName === 'number' && imageName < 1) throw new Error('无效的图片名字索引，应大于 0 值')
     if (isNaN(mediaId) || mediaId <= 0) throw new Error('无效的画廊媒体 ID 值：' + mediaId)
     const url = typeof imageName === 'number' && !isPreview ? URL.IMAGE : URL.THUMB
@@ -177,12 +177,12 @@ export class NHentaiAPI {
 function fixGallery (gallery: Gallery | Gallery[]): Gallery | Gallery[] {
   if (Array.isArray(gallery)) {
     for (const item of gallery) {
-      if (typeof item.id === 'string') {
-        item.id = parseInt(item.id)
-      }
+      typeof item.id === 'string' && (item.id = parseInt(item.id))
+      typeof item.media_id === 'string' && (item.media_id = parseInt(item.media_id))
     }
-  } else if (typeof gallery.id === 'string') {
-    gallery.id = parseInt(gallery.id)
+  } else {
+    typeof gallery.id === 'string' && (gallery.id = parseInt(gallery.id))
+    typeof gallery.media_id === 'string' && (gallery.media_id = parseInt(gallery.media_id))
   }
   return gallery
 }
