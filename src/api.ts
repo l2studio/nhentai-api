@@ -13,19 +13,20 @@ export const URL = {
   THUMB: 'https://t.nhentai.net'
 }
 
+/** @deprecated Use IMAGE_SUFFIX_TYPES record table. Will be removed in v0.3.0 */
 export const IMAGE_TYPE_TRANSFORM = (input: ImageType | ImageSuffix): ImageSuffix => {
-  switch (input) {
-    case 'jpg':
-    case 'j':
-      return 'jpg'
-    case 'png':
-    case 'p':
-      return 'png'
-    case 'gif':
-    case 'g':
-      return 'gif'
-    default: throw new Error('不支持的图片类型转换：' + input)
-  }
+  const v = IMAGE_SUFFIX_TYPES[input]
+  if (!v) throw new Error('不支持的图片类型转换：' + input)
+  return v
+}
+
+export const IMAGE_SUFFIX_TYPES: Record<ImageType | ImageSuffix, ImageSuffix> = {
+  j: 'jpg',
+  jpg: 'jpg',
+  p: 'png',
+  png: 'png',
+  g: 'gif',
+  gif: 'gif'
 }
 
 export type Options = Partial<{
@@ -125,7 +126,7 @@ export class NHentaiAPI {
     if (isNaN(mediaId) || mediaId <= 0) throw new Error('无效的画廊媒体 ID 值：' + mediaId)
     const url = typeof imageName === 'number' && !isPreview ? URL.IMAGE : URL.THUMB
     const file = typeof imageName === 'string' && isPreview ? '1t' : isPreview ? imageName + 't' : imageName
-    const extension = IMAGE_TYPE_TRANSFORM(typeof imageSuffix === 'object' ? imageSuffix.t : imageSuffix)
+    const extension = IMAGE_SUFFIX_TYPES[typeof imageSuffix === 'object' ? imageSuffix.t : imageSuffix]
     return `${url}/galleries/${mediaId}/${file}.${extension}`
   }
 
