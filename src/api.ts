@@ -16,7 +16,7 @@ export const URL = {
 /** @deprecated Use IMAGE_SUFFIX_TYPES record table. Will be removed in v0.3.0 */
 export const IMAGE_TYPE_TRANSFORM = (input: ImageType | ImageSuffix): ImageSuffix => {
   const v = IMAGE_SUFFIX_TYPES[input]
-  if (!v) throw new Error('不支持的图片类型转换：' + input)
+  if (!v) throw new Error('Unsupported image type transform：' + input)
   return v
 }
 
@@ -72,7 +72,7 @@ export class NHentaiAPI {
   }
 
   fetch (id: number): Promise<Gallery> {
-    debug('请求获取 %d 的画廊数据...', id)
+    debug('Fetch %d gallery data...', id)
     return this._fetch(`${URL.API}/gallery/${id}`)
       .json<Gallery>()
       .then((g) => fixGallery(g) as Gallery)
@@ -80,7 +80,7 @@ export class NHentaiAPI {
   }
 
   fetchRelated (id: number): Promise<Gallery[]> {
-    debug('请求获取 %d 的相关画廊数据...', id)
+    debug('Fetch %d related gallery data...', id)
     return this._fetch(`${URL.API}/gallery/${id}/related`)
       .json<{ result: Gallery[] }>()
       .then((data) => fixGallery(data.result) as Gallery[])
@@ -89,7 +89,7 @@ export class NHentaiAPI {
 
   fetchAll (page?: number): Promise<Galleries> {
     page = page || 1
-    debug('请求获取第 %d 页的画廊数据...', page)
+    debug('Fetch gallery data on page %d...', page)
     return this._fetch(`${URL.API}/galleries/all`, { searchParams: { page } })
       .json<Galleries>()
       .then(fixGalleries)
@@ -98,7 +98,7 @@ export class NHentaiAPI {
 
   search (query: string, page?: number): Promise<Galleries> {
     page = page || 1
-    debug('请求搜索关键字 %s 的第 %d 页的画廊数据...', query, page)
+    debug('Search gallery data on page %d of %s', page, query)
     return this._fetch(`${URL.API}/galleries/search`, { searchParams: { query, page } })
       .json<Galleries>()
       .then(fixGalleries)
@@ -107,7 +107,7 @@ export class NHentaiAPI {
 
   searchByTag (tagId: number, page?: number): Promise<Galleries> {
     page = page || 1
-    debug('请求搜索标签 %d 的第 %d 页的画廊数据...', tagId, page)
+    debug('Search gallery data on page %d of tag %d', page, tagId)
     return this._fetch(`${URL.API}/galleries/tagged`, { searchParams: { tag_id: tagId, page } })
       .json<Galleries>()
       .then(fixGalleries)
@@ -122,8 +122,8 @@ export class NHentaiAPI {
   ): string {
     isPreview = isPreview || false
     const mediaId = typeof galleryMediaId === 'object' ? galleryMediaId.media_id : galleryMediaId
-    if (typeof imageName === 'number' && imageName < 1) throw new Error('无效的图片名字索引，应大于 0 值')
-    if (isNaN(mediaId) || mediaId <= 0) throw new Error('无效的画廊媒体 ID 值：' + mediaId)
+    if (typeof imageName === 'number' && imageName < 1) throw new Error('Invalid image name index, should be greater than 0')
+    if (isNaN(mediaId) || mediaId <= 0) throw new Error('Invalid gallery media ID value: ' + mediaId)
     const url = typeof imageName === 'number' && !isPreview ? URL.IMAGE : URL.THUMB
     const file = typeof imageName === 'string' && isPreview ? '1t' : isPreview ? imageName + 't' : imageName
     const extension = IMAGE_SUFFIX_TYPES[typeof imageSuffix === 'object' ? imageSuffix.t : imageSuffix]
