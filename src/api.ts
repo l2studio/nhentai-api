@@ -4,7 +4,6 @@ import { httpsOverHttp, httpOverHttp } from 'tunnel'
 import got from 'got'
 
 const debug = require('debug')('lgou2w:nhentai-api')
-const isDebug = typeof process.env.DEBUG !== 'undefined'
 const DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'
 
 export const URL = {
@@ -54,7 +53,7 @@ export class NHentaiAPI {
           }
         : undefined,
       headers: { 'user-agent': opts.userAgent || DEFAULT_UA },
-      hooks: isDebug
+      hooks: debug.enabled
         ? {
             beforeRequest: [
               options => {
