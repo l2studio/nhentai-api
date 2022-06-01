@@ -33,6 +33,7 @@ class NHentaiAPI(opts?: Options)
 type Options = {
   timeout?: number    // http request timeout (optional)
   userAgent?: string  // http request User-Agent header (optional)
+  cookie?: string     // http request cookie (optional)
   proxy?: {           // http proxy (optional)
     host: string      //      proxy host (required)
     port: number      //      porxy port (required)

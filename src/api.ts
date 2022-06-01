@@ -32,6 +32,7 @@ export const IMAGE_SUFFIX_TYPES: Record<ImageType | ImageSuffix, ImageSuffix> = 
 export type Options = Partial<{
   timeout: number
   userAgent: string
+  cookie?: string
   proxy: {
     host: string
     port: number
@@ -53,7 +54,10 @@ export class NHentaiAPI {
             https: httpsOverHttp({ proxy: opts.proxy }) as any
           }
         : undefined,
-      headers: { 'user-agent': opts.userAgent || DEFAULT_UA },
+      headers: {
+        'user-agent': opts.userAgent || DEFAULT_UA,
+        cookie: opts.cookie
+      },
       hooks: debug.enabled
         ? {
             beforeRequest: [
