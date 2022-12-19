@@ -2,7 +2,7 @@
 
 
 <p>
-<a href="https://github.com/l2studio/nhentai-api/actions"><img src="https://img.shields.io/github/workflow/status/l2studio/nhentai-api/CI?logo=github&style=flat-square"/></a>
+<a href="https://github.com/l2studio/nhentai-api/actions"><img src="https://img.shields.io/github/actions/workflow/status/l2studio/nhentai-api/ci.yml?branch=main&logo=github&style=flat-square"/></a>
 <a href="https://www.npmjs.com/package/@l2studio/nhentai-api"><img src="https://img.shields.io/npm/v/@l2studio/nhentai-api?logo=npm&style=flat-square"/></a>
 </p>
 
